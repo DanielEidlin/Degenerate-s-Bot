@@ -33,7 +33,7 @@ async def on_message(message):
     """
     name = message.author
     msg = message.content
-    return (name,msg)
+    return name, msg
 
 @client.event
 async def on_member_remove(member):
