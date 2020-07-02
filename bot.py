@@ -1,9 +1,9 @@
 import discord
 from discord.ext import commands
 
-
-client = commands.Bot(command_prefix= '#')
+client = commands.Bot(command_prefix='#')
 bot_token = 'NzI4MjI2OTQwMTM3MjQyNjk3.Xv5oRw.3iWs7qFxPU2VNasbUqErc8rz_gM'
+
 
 @client.event
 async def on_ready():
@@ -14,6 +14,7 @@ async def on_ready():
     for guild in client.guilds:
         await guild.text_channels[0].send("BRACE YOURSELVES DEGENERATES! IT'S SHOW TIME!!!!")
 
+
 @client.event
 async def on_member_join(member):
     """
@@ -22,7 +23,9 @@ async def on_member_join(member):
     :return: None
     """
     guild = member.guild
-    await guild.text_channels[0].send(f"oh shit {member} has joined. like we need another degenerate in here :unamused:")
+    await guild.text_channels[0].send(
+        f"oh shit {member} has joined. like we need another degenerate in here :unamused:")
+
 
 @client.event
 async def on_message(message):
@@ -35,6 +38,19 @@ async def on_message(message):
     msg = message.content
     return name, msg
 
+
+def get_random_waifu():
+    '''
+
+    :return: A URL that contains a random waifu
+    '''
+    return "https://mywaifulist.moe/random"
+
+
+def transform_getrandomwaifu_into_command():
+    discord.ext.commands.command(name=get_random_waifu())
+
+
 @client.event
 async def on_member_remove(member):
     """
@@ -45,6 +61,7 @@ async def on_member_remove(member):
     guild = member.guild
     await guild.text_channels[0].send(f"fewwwww. {member} is gone. finally!!")
 
+
 @client.command(pass_context=True)
 async def ping(ctx):
     """
@@ -53,5 +70,6 @@ async def ping(ctx):
     :return: None
     """
     await ctx.send("Pong!")
+
 
 client.run(bot_token)
