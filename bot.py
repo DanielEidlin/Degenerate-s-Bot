@@ -3,7 +3,7 @@ from discord.ext import commands
 
 
 client = commands.Bot(command_prefix= '#')
-bot_token = ''
+bot_token = 'NzI4MjI2OTQwMTM3MjQyNjk3.Xv5iTg.AZ-p4jRNb9D_8p544USGS_dUJ9E'
 
 @client.event
 async def on_ready():
@@ -23,6 +23,17 @@ async def on_member_join(member):
     """
     guild = member.guild
     await guild.text_channels[0].send(f"oh shit {member} has joined. like we need another degenerate in here :unamused:")
+
+@client.event
+async def on_message(message):
+    """
+    called when a user writes a msg
+    :param message: message writen
+    :return: (name, msg)
+    """
+    name = message.author
+    msg = message.content
+    return (name,msg)
 
 @client.event
 async def on_member_remove(member):
