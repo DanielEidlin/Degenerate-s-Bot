@@ -29,10 +29,9 @@ async def on_member_join(member):
 
 @client.command(pass_context=True)
 async def generate(ctx):
-    '''
-
+    """
     :return: A URL that contains a random waifu
-    '''
+    """
     user = ctx.author
     url = "https://mywaifulist.moe/random"
     await ctx.send("{} has a new wifu!! \n".format(user) + url)
