@@ -1,6 +1,6 @@
 import discord
-from discord.ext import commands
 import requests
+from discord.ext import commands
 
 client = commands.Bot(command_prefix='#')
 bot_token = 'NzI4MjI2OTQwMTM3MjQyNjk3.Xv5oRw.3iWs7qFxPU2VNasbUqErc8rz_gM'
