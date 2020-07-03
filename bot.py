@@ -2,7 +2,8 @@ import base64
 import requests
 from discord.ext import commands
 
-client = commands.Bot(command_prefix='!')
+prefix = '!'
+client = commands.Bot(command_prefix=prefix)
 base64_bot_token = 'TnpJNE1qSTJPVFF3TVRNM01qUXlOamszLlh2NW9Sdy4zaVdzN3FGeFBVMlZOYXNiVXFFcmM4cnpfZ00='
 bot_token = (base64.b64decode(base64_bot_token)).decode()
 user_score = {}
@@ -88,7 +89,7 @@ async def on_member_remove(member):
 
 @client.event
 async def on_message(message):
-    if message.content.startswith('#'):
+    if message.content.startswith(prefix):
         await client.process_commands(message)
     else:
         pass
@@ -97,7 +98,7 @@ async def on_message(message):
 @client.command(pass_context=True)
 async def ping(ctx):
     """
-    shows that the server is alive and running, called when a user type #ping
+    shows that the server is alive and running, called when a user type !ping
     :param ctx: Context
     :return: None
     """
