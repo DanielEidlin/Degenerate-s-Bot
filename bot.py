@@ -179,4 +179,15 @@ async def finish(ctx):
     await ctx.send(results + "\n" + gif)
 
 
+@client.command(pass_context=True)
+async def reset(ctx):
+    """
+    Resets the players' scores.
+    :param ctx:
+    # :return: None
+    """
+    for user in user_score:
+        user_score[user][0] = 0
+
+
 client.run(bot_token)
