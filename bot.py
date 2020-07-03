@@ -26,17 +26,6 @@ async def on_member_join(member):
     await guild.text_channels[0].send(
         f"oh shit {member} has joined. like we need another degenerate in here :unamused:")
 
-# @client.event
-# async def on_message(message):
-#     """
-#     called when a user writes a msg
-#     :param message: message writen
-#     :return: (name, msg)
-#     """
-#     name = message.author
-#     msg = message.content
-#     return name, msg
-
 
 @client.command(pass_context=True)
 async def generate(ctx):
@@ -44,9 +33,9 @@ async def generate(ctx):
 
     :return: A URL that contains a random waifu
     '''
-
+    user = ctx.author
     url = "https://mywaifulist.moe/random"
-    ctx.send("username has a new wifu!! \n" + url)
+    await ctx.send("{} has a new wifu!! \n".format(user) + url)
 
 
 @client.event
