@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+import requests
 
 client = commands.Bot(command_prefix='#')
 bot_token = 'NzI4MjI2OTQwMTM3MjQyNjk3.Xv5oRw.3iWs7qFxPU2VNasbUqErc8rz_gM'
@@ -33,20 +34,10 @@ async def generate(ctx):
     :return: A URL that contains a random waifu
     """
     user = ctx.author
-    url = "https://mywaifulist.moe/random"
-    await ctx.send("{} has a new wifu!! \n".format(user) + url)
-
-
-
-@client.command(pass_context=True)
-async def generate(ctx):
-    '''
-
-    :return: A URL that contains a random waifu
-    '''
-
-    url = "https://mywaifulist.moe/random"
-    ctx.send("username has a new wifu!! \n" + url)
+    response = requests.get("https://mywaifulist.moe/random")
+    print(response.url)
+    # url = "https://mywaifulist.moe/waifu/jiao-sun"
+    await ctx.send("{} has a new waifu!! \n".format(user) + response.url)
 
 
 @client.event
@@ -59,13 +50,13 @@ async def on_member_remove(member):
     guild = member.guild
     await guild.text_channels[0].send("fewwwww. {} is gone. finally!!".format(member))
 
+
 @client.event
 async def on_message(message):
     if not message.content.startswith('#'):
         print("{},{}".format(message.author, message.content))
     else:
         await client.process_commands(message)
-
 
 
 @client.command(pass_context=True)
