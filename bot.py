@@ -33,7 +33,7 @@ async def generate(ctx):
     """
     user = ctx.author
     url = "https://mywaifulist.moe/random"
-    await ctx.send(f"{user} has a new waifu!!\n{url}"
+    await ctx.send(f"{user} has a new waifu!!\n{url}")
 
 
 @client.event
@@ -72,7 +72,9 @@ async def vote(ctx):
     :param ctx: Context
     :return: None
     """
-    await ctx.send("")
+    user = ctx.author
+    print(f"{user} your vote has been registered!")
+    await ctx.send(f"{user} your vote has been registered!")
 
 
 client.run(bot_token)
