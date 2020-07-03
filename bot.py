@@ -9,7 +9,7 @@ bot_token = (base64.b64decode(base64_bot_token)).decode()
 user_score = {}
 """
 A dictionary that contains the user nickname as the key and his score and a state of vote as the value.
-{nickname: [score, voted]
+{nickname: [score, voted]}
 """
 
 
