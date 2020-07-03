@@ -23,6 +23,8 @@ def get_member_by_letter(letter):
         if user[0].lower() == letter.lower():
             return user
 
+    return None
+
 
 def prettifie_score():
     """
@@ -34,6 +36,7 @@ def prettifie_score():
     for user, val in user_score.items():
         prettified_score += '{} {}\n'.format(user, val[0])
     return prettified_score
+
 
 @client.event
 async def on_ready():
@@ -91,6 +94,7 @@ async def on_message(message):
     else:
         pass
 
+
 @client.command(pass_context=True)
 async def ping(ctx):
     """
@@ -110,27 +114,29 @@ async def vote(ctx, user_vote):
     :return: None
     """
     user = ctx.author
-    user_score[user.nick][1] = True  # Update user's vote state to True.
-    voted_user = get_member_by_letter(user_vote[0])  # Get the chosen user.
-    if voted_user in client.get_all_members():
+
+    if get_member_by_letter(user_vote[0]) is not None:
+        user_score[user.nick][1] = True  # Update user's vote state to True.
+        voted_user = get_member_by_letter(user_vote[0])  # Get the chosen user.
+
         user_score[voted_user][0] += 1  # Increment score of the chosen user.
+        print(f"{user} your vote has been registered!")
+
+        # Check if all users have voted.
+        for member in user_score:
+            if user_score[member][1] is False:
+                return
+
+        # Update all users' vote state to False.
+        for member in user_score:
+            user_score[member][1] = False
+
+        # Send score.
+        prettified_score = prettifie_score()
+        await ctx.send(f"Here is the score:\n{prettified_score}")
+
     else:
         await ctx.send("This user is more imaginary then your girlfriend!")
-    print(f"{user} your vote has been registered!")
-
-    # Check if all users have voted.
-    for member in user_score:
-        if user_score[member][1] is False:
-            return
-
-    # Update all users' vote state to False.
-    for member in user_score:
-        user_score[member][1] = False
-
-    # Send score.
-    prettified_score = prettifie_score()
-    await ctx.send(f"Here is the score:\n{prettified_score}")
-
 
 @client.command(pass_context=True)
 async def show_score(ctx):
