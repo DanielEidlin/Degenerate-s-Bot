@@ -5,6 +5,17 @@ bot_token = 'NzI4MjI2OTQwMTM3MjQyNjk3.Xv5oRw.3iWs7qFxPU2VNasbUqErc8rz_gM'
 user_score = {}
 
 
+def get_member_by_letter(letter):
+    """
+    Return the matching user by the first letter.
+    :param letter: The first letter of the user's nickname.
+    :return: The string of the user's nickname.
+    """
+    for user in user_score:
+        if user[0].lower() == letter.lower():
+            return user
+
+
 @client.event
 async def on_ready():
     """
@@ -13,6 +24,10 @@ async def on_ready():
     """
     for guild in client.guilds:
         await guild.text_channels[0].send("BRACE YOURSELVES DEGENERATES! IT'S SHOW TIME!!!!")
+
+    global user_score
+    user_score = {member.nick: 0 for member in client.get_all_members() if
+                  "Waifu Protector" in [role.name for role in member.roles]}
 
 
 @client.event
@@ -36,7 +51,6 @@ async def generate(ctx):
     random = "random"
     url = f"https://mywaifulist.moe/{random}"
     await ctx.send(f"{user} has a new waifu!!\n{url}")
-    url = "i love hoes"
 
 
 @client.event
@@ -69,17 +83,16 @@ async def ping(ctx):
 
 
 @client.command(pass_context=True)
-async def vote(ctx):
+async def vote(ctx, user_vote):
     """
     Registers a vote from a user.
     :param ctx: Context
+    :param user_vote: The user's vote.
     :return: None
     """
     user = ctx.author
-    if user_score[user] is None:
-        user_score[user] = 1
-    else:
-        user_score[user] += 1
+    voted_user = get_member_by_letter(user_vote[0])
+    user_score[voted_user] += 1
     print(f"{user} your vote has been registered!")
     await ctx.send(f"{user} your vote has been registered!")
 
