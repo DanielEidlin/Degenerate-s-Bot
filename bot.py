@@ -1,9 +1,9 @@
-import discord
+import base64
 from discord.ext import commands
 
 client = commands.Bot(command_prefix='#')
-bot_token = 'NzI4MjI2OTQwMTM3MjQyNjk3.Xv5oRw.3iWs7qFxPU2VNasbUqErc8rz_gM'
-
+base64_bot_token = 'TnpJNE1qSTJPVFF3TVRNM01qUXlOamszLlh2NW9Sdy4zaVdzN3FGeFBVMlZOYXNiVXFFcmM4cnpfZ00='
+bot_token = (base64.b64decode(base64_bot_token)).decode()
 
 @client.event
 async def on_ready():
@@ -50,10 +50,9 @@ async def on_member_remove(member):
 @client.event
 async def on_message(message):
     if not message.content.startswith('#'):
-        print("{},{}".format(message.author, message.content))
+        pass
     else:
         await client.process_commands(message)
-
 
 @client.command(pass_context=True)
 async def ping(ctx):
