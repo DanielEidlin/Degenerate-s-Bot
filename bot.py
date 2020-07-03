@@ -20,6 +20,18 @@ def get_member_by_letter(letter):
             return user
 
 
+def prettifie_score():
+    """
+    Prettifie the score dict.
+    :return: Prettified score dict.
+    """
+    # Prettifie score
+    prettified_score = ""
+    for user, val in user_score.items():
+        prettified_score += '{} {}\n'.format(user, val[0])
+    return prettified_score
+
+
 @client.event
 async def on_ready():
     """
@@ -95,9 +107,9 @@ async def vote(ctx, user_vote):
     :return: None
     """
     user = ctx.author
-    user_score[user.nick][1] = True     # Update user's vote state to True.
-    voted_user = get_member_by_letter(user_vote[0])     # Get the chosen user.
-    user_score[voted_user][0] += 1     # Increment score of the chosen user.
+    user_score[user.nick][1] = True  # Update user's vote state to True.
+    voted_user = get_member_by_letter(user_vote[0])  # Get the chosen user.
+    user_score[voted_user][0] += 1  # Increment score of the chosen user.
     print(f"{user} your vote has been registered!")
 
     # Check if all users have voted.
@@ -110,7 +122,8 @@ async def vote(ctx, user_vote):
         user_score[member][1] = False
 
     # Send score.
-    await ctx.send(f"Here is the score:\n{user_score}")
+    prettified_score = prettifie_score()
+    await ctx.send(f"Here is the score:\n{prettified_score}")
 
 
 @client.command(pass_context=True)
@@ -121,7 +134,8 @@ async def show_score(ctx):
     :return: None
     """
     print("Showing score")
-    await ctx.send(user_score)
+    prettified_score = prettifie_score()
+    await ctx.send(prettified_score)
 
 
 client.run(bot_token)
