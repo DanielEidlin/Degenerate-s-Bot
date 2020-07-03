@@ -1,4 +1,6 @@
 import base64
+import discord
+import requests
 from discord.ext import commands
 
 client = commands.Bot(command_prefix='#')
@@ -33,8 +35,10 @@ async def generate(ctx):
     :return: A URL that contains a random waifu
     """
     user = ctx.author
-    url = "https://mywaifulist.moe/random"
-    await ctx.send("{} has a new wifu!! \n".format(user) + url)
+    response = requests.get("https://mywaifulist.moe/random")
+    print(response.url)
+    # url = "https://mywaifulist.moe/waifu/jiao-sun"
+    await ctx.send("{} has a new waifu!! \n".format(user) + response.url)
 
 
 @client.event
@@ -46,6 +50,7 @@ async def on_member_remove(member):
     """
     guild = member.guild
     await guild.text_channels[0].send("fewwwww. {} is gone. finally!!".format(member))
+
 
 @client.event
 async def on_message(message):
