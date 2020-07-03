@@ -1,9 +1,9 @@
 import discord
 from discord.ext import commands
 
-
-client = commands.Bot(command_prefix= '#')
+client = commands.Bot(command_prefix='#')
 bot_token = 'NzI4MjI2OTQwMTM3MjQyNjk3.Xv5oRw.3iWs7qFxPU2VNasbUqErc8rz_gM'
+
 
 @client.event
 async def on_ready():
@@ -14,6 +14,7 @@ async def on_ready():
     for guild in client.guilds:
         await guild.text_channels[0].send("BRACE YOURSELVES DEGENERATES! IT'S SHOW TIME!!!!")
 
+
 @client.event
 async def on_member_join(member):
     """
@@ -22,18 +23,19 @@ async def on_member_join(member):
     :return: None
     """
     guild = member.guild
-    await guild.text_channels[0].send(f"oh shit {member} has joined. like we need another degenerate in here :unamused:")
+    await guild.text_channels[0].send(
+        f"oh shit {member} has joined. like we need another degenerate in here :unamused:")
 
-@client.event
-async def on_message(message):
+
+@client.command(pass_context=True)
+async def generate(ctx):
     """
-    called when a user writes a msg
-    :param message: message writen
-    :return: (name, msg)
+    :return: A URL that contains a random waifu
     """
-    name = message.author
-    msg = message.content
-    return name, msg
+    user = ctx.author
+    url = "https://mywaifulist.moe/random"
+    await ctx.send("{} has a new wifu!! \n".format(user) + url)
+
 
 @client.event
 async def on_member_remove(member):
@@ -43,7 +45,15 @@ async def on_member_remove(member):
     :return: None
     """
     guild = member.guild
-    await guild.text_channels[0].send(f"fewwwww. {member} is gone. finally!!")
+    await guild.text_channels[0].send("fewwwww. {} is gone. finally!!".format(member))
+
+@client.event
+async def on_message(message):
+    if not message.content.startswith('#'):
+        print("{},{}".format(message.author, message.content))
+    else:
+        await client.process_commands(message)
+
 
 @client.command(pass_context=True)
 async def ping(ctx):
@@ -53,5 +63,6 @@ async def ping(ctx):
     :return: None
     """
     await ctx.send("Pong!")
+
 
 client.run(bot_token)
