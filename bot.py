@@ -22,18 +22,18 @@ async def on_member_join(member):
     :return: None
     """
     guild = member.guild
-    await guild.text_channels[0].send(f"oh shit {member} has joined. like we need another degenerate in here :unamused:")
+    await guild.text_channels[0].send("oh shit {} has joined. like we need another degenerate in here :unamused:".format(member))
 
-@client.event
-async def on_message(message):
-    """
-    called when a user writes a msg
-    :param message: message writen
-    :return: (name, msg)
-    """
-    name = message.author
-    msg = message.content
-    return name, msg
+# @client.event
+# async def on_message(message):
+#     """
+#     called when a user writes a msg
+#     :param message: message writen
+#     :return: (name, msg)
+#     """
+#     name = message.author
+#     msg = message.content
+#     return name, msg
 
 @client.event
 async def on_member_remove(member):
@@ -43,7 +43,14 @@ async def on_member_remove(member):
     :return: None
     """
     guild = member.guild
-    await guild.text_channels[0].send(f"fewwwww. {member} is gone. finally!!")
+    await guild.text_channels[0].send("fewwwww. {} is gone. finally!!".format(member))
+
+@client.event
+async def on_message(message):
+    if not message.content.startswith('#'):
+        print("{},{}".format(message.author, message.content))
+    else:
+        await client.process_commands(message)
 
 @client.command(pass_context=True)
 async def ping(ctx):
