@@ -2,6 +2,7 @@ from discord.ext import commands
 
 client = commands.Bot(command_prefix='#')
 bot_token = 'NzI4MjI2OTQwMTM3MjQyNjk3.Xv5oRw.3iWs7qFxPU2VNasbUqErc8rz_gM'
+user_score = {}
 
 
 @client.event
@@ -32,8 +33,10 @@ async def generate(ctx):
     :return: A URL that contains a random waifu
     """
     user = ctx.author
-    url = "https://mywaifulist.moe/random"
+    random = "random"
+    url = f"https://mywaifulist.moe/{random}"
     await ctx.send(f"{user} has a new waifu!!\n{url}")
+    url = "i love hoes"
 
 
 @client.event
@@ -73,6 +76,10 @@ async def vote(ctx):
     :return: None
     """
     user = ctx.author
+    if user_score[user] is None:
+        user_score[user] = 1
+    else:
+        user_score[user] += 1
     print(f"{user} your vote has been registered!")
     await ctx.send(f"{user} your vote has been registered!")
 
