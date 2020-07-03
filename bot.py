@@ -138,6 +138,7 @@ async def vote(ctx, user_vote):
     else:
         await ctx.send("This user is more imaginary then your girlfriend!")
 
+
 @client.command(pass_context=True)
 async def show_score(ctx):
     """
@@ -148,6 +149,7 @@ async def show_score(ctx):
     print("Showing score")
     prettified_score = prettifie_score()
     await ctx.send(prettified_score)
+
 
 @client.command(pass_context=True)
 async def finish(ctx):
@@ -169,7 +171,7 @@ async def finish(ctx):
     if len(winners) > 1:
         winner_names = ""
         for winner in winners:
-            winner_names = winner_names + " "+ winner
+            winner_names = winner_names + " " + winner
         results = f"the winners are {winner_names}!!!"
     else:
         results = f"the winner is {winners[0]}!!!"
