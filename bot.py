@@ -49,10 +49,10 @@ async def on_member_remove(member):
 
 @client.event
 async def on_message(message):
-    if not message.content.startswith('#'):
-        pass
-    else:
+    if message.content.startswith('#'):
         await client.process_commands(message)
+    else:
+        pass
 
 @client.command(pass_context=True)
 async def ping(ctx):
