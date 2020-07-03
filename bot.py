@@ -3,7 +3,7 @@ import discord
 import requests
 from discord.ext import commands
 
-client = commands.Bot(command_prefix='#')
+client = commands.Bot(command_prefix='!')
 base64_bot_token = 'TnpJNE1qSTJPVFF3TVRNM01qUXlOamszLlh2NW9Sdy4zaVdzN3FGeFBVMlZOYXNiVXFFcmM4cnpfZ00='
 bot_token = (base64.b64decode(base64_bot_token)).decode()
 user_score = {}
@@ -139,6 +139,33 @@ async def show_score(ctx):
     print("Showing score")
     prettified_score = prettifie_score()
     await ctx.send(prettified_score)
+
+@client.command(pass_context=True)
+async def finish(ctx):
+    """
+    gives the L
+    :param ctx: Context
+    :return: None
+    """
+    winners = []
+    max_points = 0
+    for user in user_score:
+        if user_score[user][0] > max_points:
+            winners.clear()
+            winners.append(user)
+            max_points = user_score[user][0]
+        elif user_score[user][0] == max_points:
+            winners.append(user)
+
+    if len(winners) > 1:
+        winner_names = ""
+        for winner in winners:
+            winner_names = winner_names + " "+ winner
+        results = f"the winners are {winner_names}!!!"
+    else:
+        results = f"the winner is {winners[0]}!!!"
+    gif = "https://giphy.com/gifs/thebachelor-the-bachelor-thebachelorabc-bachelorabc-EBolRO7z50KTOn85Pi"
+    await ctx.send(results + "\n" + gif)
 
 
 client.run(bot_token)
