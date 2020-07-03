@@ -112,7 +112,10 @@ async def vote(ctx, user_vote):
     user = ctx.author
     user_score[user.nick][1] = True  # Update user's vote state to True.
     voted_user = get_member_by_letter(user_vote[0])  # Get the chosen user.
-    user_score[voted_user][0] += 1  # Increment score of the chosen user.
+    if voted_user in client.get_all_members():
+        user_score[voted_user][0] += 1  # Increment score of the chosen user.
+    else:
+        await ctx.send("This user is more imaginary then your girlfriend!")
     print(f"{user} your vote has been registered!")
 
     # Check if all users have voted.
