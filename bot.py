@@ -84,4 +84,15 @@ async def vote(ctx):
     await ctx.send(f"{user} your vote has been registered!")
 
 
+@client.command(pass_context=True)
+async def show_score(ctx):
+    """
+    Displays the current score.
+    :param ctx: Context
+    :return: None
+    """
+    print("Showing score")
+    await ctx.send(user_score)
+
+
 client.run(bot_token)
