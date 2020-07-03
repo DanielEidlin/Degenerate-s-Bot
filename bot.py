@@ -39,15 +39,14 @@ async def on_message(message):
     return name, msg
 
 
-def get_random_waifu():
+def get_random_waifu(member):
     '''
 
     :return: A URL that contains a random waifu
     '''
-    return "https://mywaifulist.moe/random"
-
-
-def transform_getrandomwaifu_into_command():
+    url = "https://mywaifulist.moe/random"
+    guild = member.guild
+    await guild.text_channels[0].send(url)
     discord.ext.commands.command(name=get_random_waifu())
 
 
