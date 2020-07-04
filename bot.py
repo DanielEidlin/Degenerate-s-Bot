@@ -21,7 +21,7 @@ class Player(object):
 def get_member_by_name(name: str) -> Optional[Player]:
     """
     Return the matching player by the player display name.
-    :param letter: The user's display name.
+    :param name: The user's display name.
     :return: Player object.
     """
     for player in players:
@@ -29,6 +29,7 @@ def get_member_by_name(name: str) -> Optional[Player]:
             return player
 
     return None
+
 
 def get_user_from_id(ctx, id):
     """
@@ -38,9 +39,10 @@ def get_user_from_id(ctx, id):
     :return: User (discord.user)
     """
 
-    for user in ctx.guild.members:
+    for user in client.get_all_members():
         if str(user.id) == str(id):
             return user
+
 
 def prettifie_score() -> str:
     """
@@ -54,6 +56,7 @@ def prettifie_score() -> str:
     if prettified_score == "":
         prettified_score = "wow. no weebs today"
     return prettified_score
+
 
 def update_players(guild):
     """
@@ -112,6 +115,7 @@ async def reset(ctx):
 
     guild = ctx.guild
     update_players(guild)
+
 
 @client.command(pass_context=True)
 async def remove(ctx, player):
