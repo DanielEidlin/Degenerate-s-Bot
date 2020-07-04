@@ -12,35 +12,27 @@ players = []  # type: List[Player]
 
 
 class Player(object):
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, mention_string):
+        self.mention_string = mention_string
         self.round_score = 0
         self.total_score = 0
         self.has_voted = False
 
 
-def get_player_by_display_name(name: str) -> Optional[Player]:
+def get_player_by_mention_string(mention_string: str) -> Optional[Player]:
     """
     Return the matching player by the player display name.
-    :param name: The user's display name.
+    :param mention_string: The user's mention string.
     :return: Player object.
     """
+    # The strip is needed because Discord has a stupid bug that sometimes the string contains ! and sometimes doesn't.
+    stripped_mention_string = mention_string.replace("!", "")
     for player in players:
-        if player.name == name:
+        stripped_player_mention_string = player.mention_string.replace("!", "")
+        if stripped_player_mention_string == stripped_mention_string:
             return player
 
     return None
-
-
-def get_user_from_id(ctx, user_id):
-    """
-    return a user that has the id
-    :param user_id: The user id
-    :return: User (discord.user)
-    """
-    for user in ctx.guild.members:
-        if str(user.id) == str(user_id):
-            return user
 
 
 def prettifie_score() -> str:
@@ -51,7 +43,7 @@ def prettifie_score() -> str:
     # Prettifie score
     prettified_score = ""
     for player in players:
-        prettified_score += f'{player.name} {player.total_score}\n'
+        prettified_score += f'{player.mention_string} {player.total_score}\n'
     if prettified_score == "":
         prettified_score = "wow. no weebs today"
     return prettified_score
@@ -84,14 +76,6 @@ def end_round():
         player.has_voted = False
 
 
-def get_id_from_raw(player):
-    id = ""
-    for char in player:
-        if char.isdigit():
-            id += char
-    return id
-
-
 def update_players(guild):
     """
     updates the player pool
@@ -99,9 +83,8 @@ def update_players(guild):
     :return: None
     """
     players.clear()
-
     for member in guild.voice_channels[0].members:
-        players.append(Player(name=member.display_name))
+        players.append(Player(mention_string=member.mention))
 
 
 @client.event
@@ -146,34 +129,28 @@ async def reset(ctx):
     reset the score and the players
     :return: None
     """
-
     guild = ctx.guild
     update_players(guild)
 
 
 @client.command(pass_context=True)
-async def remove(ctx, player):
+async def remove(mention_string):
     """
     removes a player from game
     :return: None
     """
-    player_id = get_id_from_raw(player)
-    name = get_user_from_id(ctx, player_id).display_name
-    user = get_player_by_display_name(name)
-
-    if user in players:
-        players.remove(user)
+    player = get_player_by_mention_string(mention_string)
+    if player in players:
+        players.remove(player)
 
 
 @client.command(pass_context=True)
-async def add(ctx, player):
+async def add(player):
     """
     adds a player to game
     :return: None
     """
-    player_id = get_id_from_raw(player)
-    name = get_user_from_id(ctx, player_id).display_name
-    players.append(Player(name=name))
+    players.append(Player(mention_string=player))
 
 
 @client.event
@@ -206,18 +183,16 @@ async def ping(ctx):
 
 
 @client.command(pass_context=True)
-async def vote(ctx, user_vote: str):
+async def vote(ctx, mention_string: str):
     """
     Registers a vote from a user.
     :param ctx: Context
-    :param user_vote: The user's vote.
+    :param mention_string: The mention string of the user one has voted for.
     :return: None
     """
     user = ctx.author
-    voter = get_player_by_display_name(user.display_name)
-    player_id = get_id_from_raw(user_vote)
-    user_vote = get_user_from_id(ctx, player_id)
-    voted_player = get_player_by_display_name(user_vote.display_name)
+    voter = get_player_by_mention_string(user.mention)
+    voted_player = get_player_by_mention_string(mention_string)
     if not voter.has_voted and voted_player:
         voter.has_voted = True  # Update user's vote state to True.
         voted_player.round_score += 1  # Increment score of the chosen user.
