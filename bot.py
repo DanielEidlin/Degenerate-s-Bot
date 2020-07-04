@@ -192,8 +192,8 @@ async def reset(ctx):
     :param ctx:
     # :return: None
     """
-    for user in user_score:
-        user_score[user][0] = 0
+    for player in players:
+        player.score = 0
 
 
 client.run(bot_token)
