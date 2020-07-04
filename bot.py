@@ -32,10 +32,10 @@ def get_member_by_letter(letter: str) -> Optional[Player]:
     return None
 
 
-def prettifie_score():
+def prettifie_score() -> str:
     """
-    Prettifie the score dict.
-    :return: Prettified score dict.
+    Prettifie the score.
+    :return: Prettified score string.
     """
     # Prettifie score
     prettified_score = ""
@@ -113,7 +113,7 @@ async def ping(ctx):
 
 
 @client.command(pass_context=True)
-async def vote(ctx, user_vote):
+async def vote(ctx, user_vote: str):
     """
     Registers a vote from a user.
     :param ctx: Context
