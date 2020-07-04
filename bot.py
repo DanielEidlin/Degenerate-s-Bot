@@ -1,27 +1,33 @@
 import base64
 import requests
+from typing import Optional
 from discord.ext import commands
 
-prefix = '!'
-client = commands.Bot(command_prefix=prefix)
+PREFIX = '!'
+client = commands.Bot(command_prefix=PREFIX)
 base64_bot_token = 'TnpJNE1qSTJPVFF3TVRNM01qUXlOamszLlh2NW9Sdy4zaVdzN3FGeFBVMlZOYXNiVXFFcmM4cnpfZ00='
 bot_token = (base64.b64decode(base64_bot_token)).decode()
-user_score = {}
-"""
-A dictionary that contains the user nickname as the key and his score and a state of vote as the value.
-{nickname: [score, voted]}
-"""
+PLAYER_ROLE = "Waifu Protector"
+players = []  # type: List[Player]
+""" A list containing all the Player objects, representing the players in the game. """
 
 
-def get_member_by_letter(letter):
+class Player(object):
+    def __init__(self, nickname):
+        self.nickname = nickname
+        self.score = 0
+        self.has_voted = False
+
+
+def get_member_by_letter(letter: str) -> Optional[Player]:
     """
-    Return the matching user by the first letter.
+    Return the matching player by the first letter of it's nickname.
     :param letter: The first letter of the user's nickname.
-    :return: The string of the user's nickname.
+    :return: Player object.
     """
-    for user in user_score:
-        if user[0].lower() == letter.lower():
-            return user
+    for player in players:
+        if player.nickname[0].lower() == letter.lower():
+            return player
 
     return None
 
@@ -33,8 +39,8 @@ def prettifie_score():
     """
     # Prettifie score
     prettified_score = ""
-    for user, val in user_score.items():
-        prettified_score += '{} {}\n'.format(user, val[0])
+    for player in players:
+        prettified_score += f'{player.nickname} {player.score}\n'
     return prettified_score
 
 
@@ -47,9 +53,10 @@ async def on_ready():
     for guild in client.guilds:
         await guild.text_channels[0].send("BRACE YOURSELVES DEGENERATES! IT'S SHOW TIME!!!!")
 
-    global user_score
-    user_score = {member.nick: [0, False] for member in client.get_all_members() if
-                  "Waifu Protector" in [role.name for role in member.roles]}
+    # Initialize players
+    for member in client.get_all_members():
+        if PLAYER_ROLE in [role.name for role in member.roles]:
+            players.append(Player(nickname=member.nick))
 
 
 @client.event
@@ -89,7 +96,7 @@ async def on_member_remove(member):
 
 @client.event
 async def on_message(message):
-    if message.content.startswith(prefix):
+    if message.content.startswith(PREFIX):
         await client.process_commands(message)
     else:
         pass
@@ -114,22 +121,21 @@ async def vote(ctx, user_vote):
     :return: None
     """
     user = ctx.author
-
-    if get_member_by_letter(user_vote[0]) is not None:
-        user_score[user.nick][1] = True  # Update user's vote state to True.
-        voted_user = get_member_by_letter(user_vote[0])  # Get the chosen user.
-
-        user_score[voted_user][0] += 1  # Increment score of the chosen user.
+    voted_user = get_member_by_letter(user_vote[0])
+    if voted_user:
+        voter = get_member_by_letter(user.nick[0])
+        voter.has_voted = True  # Update user's vote state to True.
+        voted_user.score += 1  # Increment score of the chosen user.
         print(f"{user} your vote has been registered!")
 
         # Check if all users have voted.
-        for member in user_score:
-            if user_score[member][1] is False:
+        for player in players:
+            if not player.has_voted:
                 return
 
         # Update all users' vote state to False.
-        for member in user_score:
-            user_score[member][1] = False
+        for player in players:
+            player.has_voted = False
 
         # Send score.
         prettified_score = prettifie_score()
@@ -160,18 +166,18 @@ async def finish(ctx):
     """
     winners = []
     max_points = 0
-    for user in user_score:
-        if user_score[user][0] > max_points:
+    for player in players:
+        if player.score > max_points:
             winners.clear()
-            winners.append(user)
-            max_points = user_score[user][0]
-        elif user_score[user][0] == max_points:
-            winners.append(user)
+            winners.append(player)
+            max_points = player.score
+        elif player.score == max_points:
+            winners.append(player)
 
     if len(winners) > 1:
         winner_names = ""
         for winner in winners:
-            winner_names = winner_names + " " + winner
+            winner_names += " " + winner.nickname
         results = f"the winners are {winner_names}!!!"
     else:
         results = f"the winner is {winners[0]}!!!"
