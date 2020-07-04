@@ -46,6 +46,10 @@ def prettifie_score() -> str:
 
 
 def end_round():
+    """
+    Calculate the round winners and increment their points.
+    :return:
+    """
     # Find round winner/s
     round_winners = []  # type: List[Player]
     highest_score = 0
