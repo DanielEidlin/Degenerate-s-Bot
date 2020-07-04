@@ -14,11 +14,12 @@ players = []  # type: List[Player]
 class Player(object):
     def __init__(self, name):
         self.name = name
-        self.score = 0
+        self.round_score = 0
+        self.total_score = 0
         self.has_voted = False
 
 
-def get_member_by_name(name: str) -> Optional[Player]:
+def get_player_by_display_name(name: str) -> Optional[Player]:
     """
     Return the matching player by the player display name.
     :param name: The user's display name.
@@ -31,16 +32,14 @@ def get_member_by_name(name: str) -> Optional[Player]:
     return None
 
 
-def get_user_from_id(ctx, id):
+def get_user_from_id(ctx, user_id):
     """
     return a user that has the id
-    :param id: The user id
-    :param ctx: Context
+    :param user_id: The user id
     :return: User (discord.user)
     """
-
-    for user in client.get_all_members():
-        if str(user.id) == str(id):
+    for user in ctx.guild.members:
+        if str(user.id) == str(user_id):
             return user
 
 
@@ -52,10 +51,45 @@ def prettifie_score() -> str:
     # Prettifie score
     prettified_score = ""
     for player in players:
-        prettified_score += f'{player.name} {player.score}\n'
+        prettified_score += f'{player.name} {player.total_score}\n'
     if prettified_score == "":
         prettified_score = "wow. no weebs today"
     return prettified_score
+
+
+def end_round():
+    """
+    Calculate the round winners and increment their points.
+    :return:
+    """
+    # Find round winner/s
+    round_winners = []  # type: List[Player]
+    highest_score = 0
+    for player in players:
+        if player.round_score > highest_score:
+            round_winners.clear()
+            round_winners.append(player)
+            highest_score = player.round_score
+        elif player.round_score == highest_score:
+            round_winners.append(player)
+            highest_score = player.round_score
+
+    # Increment winners' score
+    for winner in round_winners:
+        winner.total_score += 1
+
+    # Reset round score and vote state
+    for player in players:
+        player.round_score = 0
+        player.has_voted = False
+
+
+def get_id_from_raw(player):
+    id = ""
+    for char in player:
+        if char.isdigit():
+            id += char
+    return id
 
 
 def update_players(guild):
@@ -123,8 +157,9 @@ async def remove(ctx, player):
     removes a player from game
     :return: None
     """
-    name = get_user_from_id(ctx, player[3:-1]).display_name
-    user = get_member_by_name(name)
+    player_id = get_id_from_raw(player)
+    name = get_user_from_id(ctx, player_id).display_name
+    user = get_player_by_display_name(name)
 
     if user in players:
         players.remove(user)
@@ -136,7 +171,8 @@ async def add(ctx, player):
     adds a player to game
     :return: None
     """
-    name = get_user_from_id(ctx, player[3:-1]).display_name
+    player_id = get_id_from_raw(player)
+    name = get_user_from_id(ctx, player_id).display_name
     players.append(Player(name=name))
 
 
@@ -178,22 +214,20 @@ async def vote(ctx, user_vote: str):
     :return: None
     """
     user = ctx.author
-    user_vote = get_user_from_id(ctx, user_vote[3:-1])
-    voted_user = get_member_by_name(user_vote.display_name)
-    if voted_user:
-        voter = get_member_by_name(user.display_name)
+    voter = get_player_by_display_name(user.display_name)
+    player_id = get_id_from_raw(user_vote)
+    user_vote = get_user_from_id(ctx, player_id)
+    voted_player = get_player_by_display_name(user_vote.display_name)
+    if not voter.has_voted and voted_player:
         voter.has_voted = True  # Update user's vote state to True.
-        voted_user.score += 1  # Increment score of the chosen user.
+        voted_player.round_score += 1  # Increment score of the chosen user.
 
         # Check if all users have voted.
         for player in players:
             if not player.has_voted:
                 return
 
-        # Update all users' vote state to False.
-        for player in players:
-            player.has_voted = False
-
+        end_round()
         # Send score.
         prettified_score = prettifie_score()
         await ctx.send(f"Here is the score:\n{prettified_score}")
@@ -223,11 +257,11 @@ async def finish(ctx):
     winners = []
     max_points = 0
     for player in players:
-        if player.score > max_points:
+        if player.total_score > max_points:
             winners.clear()
             winners.append(player)
-            max_points = player.score
-        elif player.score == max_points:
+            max_points = player.total_score
+        elif player.total_score == max_points:
             winners.append(player)
 
     if len(winners) > 1:
