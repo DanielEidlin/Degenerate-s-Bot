@@ -45,11 +45,7 @@ def prettifie_score() -> str:
     return prettified_score
 
 
-def end_round(ctx):
-    # Update all users' vote state to False.
-    for player in players:
-        player.has_voted = False
-
+def end_round():
     # Find round winner/s
     round_winners = []  # type: List[Player]
     highest_score = 0
@@ -66,9 +62,10 @@ def end_round(ctx):
     for winner in round_winners:
         winner.total_score += 1
 
-    # Send score.
-    prettified_score = prettifie_score()
-    await ctx.send(f"Here is the score:\n{prettified_score}")
+    # Reset round score and vote state
+    for player in players:
+        player.round_score = 0
+        player.has_voted = False
 
 
 @client.event
@@ -149,10 +146,10 @@ async def vote(ctx, user_vote: str):
     """
     user = ctx.author
     voted_user = get_member_by_letter(user_vote[0])
-    if voted_user:
-        voter = get_member_by_letter(user.nick[0])
+    voter = get_member_by_letter(user.nick[0])
+    if not voter.has_voted and voted_user:
         voter.has_voted = True  # Update user's vote state to True.
-        voted_user.total_score += 1  # Increment score of the chosen user.
+        voted_user.round_score += 1  # Increment score of the chosen user.
         print(f"{user} your vote has been registered!")
 
         # Check if all users have voted.
@@ -160,7 +157,10 @@ async def vote(ctx, user_vote: str):
             if not player.has_voted:
                 return
 
-        end_round(ctx)
+        end_round()
+        # Send score.
+        prettified_score = prettifie_score()
+        await ctx.send(f"Here is the score:\n{prettified_score}")
 
     else:
         await ctx.send("This user is more imaginary then your girlfriend!")
