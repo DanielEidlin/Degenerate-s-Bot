@@ -7,30 +7,40 @@ PREFIX = '!'
 client = commands.Bot(command_prefix=PREFIX)
 base64_bot_token = 'TnpJNE1qSTJPVFF3TVRNM01qUXlOamszLlh2NW9Sdy4zaVdzN3FGeFBVMlZOYXNiVXFFcmM4cnpfZ00='
 bot_token = (base64.b64decode(base64_bot_token)).decode()
-PLAYER_ROLE = "Waifu Protector"
 players = []  # type: List[Player]
 """ A list containing all the Player objects, representing the players in the game. """
 
 
 class Player(object):
-    def __init__(self, nickname):
-        self.nickname = nickname
+    def __init__(self, name):
+        self.name = name
         self.round_score = 0
         self.total_score = 0
         self.has_voted = False
 
 
-def get_member_by_letter(letter: str) -> Optional[Player]:
+def get_player_by_display_name(name: str) -> Optional[Player]:
     """
-    Return the matching player by the first letter of it's nickname.
-    :param letter: The first letter of the user's nickname.
+    Return the matching player by the player display name.
+    :param name: The user's display name.
     :return: Player object.
     """
     for player in players:
-        if player.nickname[0].lower() == letter.lower():
+        if player.name == name:
             return player
 
     return None
+
+
+def get_user_from_id(ctx, user_id):
+    """
+    return a user that has the id
+    :param user_id: The user id
+    :return: User (discord.user)
+    """
+    for user in ctx.guild.members:
+        if str(user.id) == str(user_id):
+            return user
 
 
 def prettifie_score() -> str:
@@ -41,7 +51,9 @@ def prettifie_score() -> str:
     # Prettifie score
     prettified_score = ""
     for player in players:
-        prettified_score += f'{player.nickname} {player.total_score}\n'
+        prettified_score += f'{player.name} {player.total_score}\n'
+    if prettified_score == "":
+        prettified_score = "wow. no weebs today"
     return prettified_score
 
 
@@ -72,6 +84,26 @@ def end_round():
         player.has_voted = False
 
 
+def get_id_from_raw(player):
+    id = ""
+    for char in player:
+        if char.isdigit():
+            id += char
+    return id
+
+
+def update_players(guild):
+    """
+    updates the player pool
+    :param guild: the guild being updated
+    :return: None
+    """
+    players.clear()
+
+    for member in guild.voice_channels[0].members:
+        players.append(Player(name=member.display_name))
+
+
 @client.event
 async def on_ready():
     """
@@ -81,10 +113,8 @@ async def on_ready():
     for guild in client.guilds:
         await guild.text_channels[0].send("BRACE YOURSELVES DEGENERATES! IT'S SHOW TIME!!!!")
 
-    # Initialize players
-    for member in client.get_all_members():
-        if PLAYER_ROLE in [role.name for role in member.roles]:
-            players.append(Player(nickname=member.nick))
+        # Initialize players
+        update_players(guild)
 
 
 @client.event
@@ -106,9 +136,44 @@ async def generate(ctx):
     """
     user = ctx.author
     response = requests.get("https://mywaifulist.moe/random")
-    print(response.url)
     # url = "https://mywaifulist.moe/waifu/jiao-sun"
     await ctx.send("{} has a new waifu!! \n".format(user) + response.url)
+
+
+@client.command(pass_context=True)
+async def reset(ctx):
+    """
+    reset the score and the players
+    :return: None
+    """
+
+    guild = ctx.guild
+    update_players(guild)
+
+
+@client.command(pass_context=True)
+async def remove(ctx, player):
+    """
+    removes a player from game
+    :return: None
+    """
+    player_id = get_id_from_raw(player)
+    name = get_user_from_id(ctx, player_id).display_name
+    user = get_player_by_display_name(name)
+
+    if user in players:
+        players.remove(user)
+
+
+@client.command(pass_context=True)
+async def add(ctx, player):
+    """
+    adds a player to game
+    :return: None
+    """
+    player_id = get_id_from_raw(player)
+    name = get_user_from_id(ctx, player_id).display_name
+    players.append(Player(name=name))
 
 
 @client.event
@@ -149,12 +214,13 @@ async def vote(ctx, user_vote: str):
     :return: None
     """
     user = ctx.author
-    voted_user = get_member_by_letter(user_vote[0])
-    voter = get_member_by_letter(user.nick[0])
-    if not voter.has_voted and voted_user:
+    voter = get_player_by_display_name(user.display_name)
+    player_id = get_id_from_raw(user_vote)
+    user_vote = get_user_from_id(ctx, player_id)
+    voted_player = get_player_by_display_name(user_vote.display_name)
+    if not voter.has_voted and voted_player:
         voter.has_voted = True  # Update user's vote state to True.
-        voted_user.round_score += 1  # Increment score of the chosen user.
-        print(f"{user} your vote has been registered!")
+        voted_player.round_score += 1  # Increment score of the chosen user.
 
         # Check if all users have voted.
         for player in players:
@@ -177,7 +243,6 @@ async def show_score(ctx):
     :param ctx: Context
     :return: None
     """
-    print("Showing score")
     prettified_score = prettifie_score()
     await ctx.send(prettified_score)
 
@@ -202,24 +267,12 @@ async def finish(ctx):
     if len(winners) > 1:
         winner_names = ""
         for winner in winners:
-            winner_names += " " + winner.nickname
+            winner_names += " " + winner.name
         results = f"the winners are {winner_names}!!!"
     else:
         results = f"the winner is {winners[0]}!!!"
     gif = "https://giphy.com/gifs/thebachelor-the-bachelor-thebachelorabc-bachelorabc-EBolRO7z50KTOn85Pi"
     await ctx.send(results + "\n" + gif)
-
-
-@client.command(pass_context=True)
-async def reset(ctx):
-    """
-    Resets the players' scores.
-    :param ctx:
-    # :return: None
-    """
-    for player in players:
-        player.total_score = 0
-        player.round_score = 0
 
 
 client.run(bot_token)
