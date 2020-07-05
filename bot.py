@@ -1,12 +1,19 @@
-import base64
+import os
+import boto
 import requests
 from typing import Optional
 from discord.ext import commands
+from boto.s3.connection import S3Connection
+
 
 PREFIX = '!'
 client = commands.Bot(command_prefix=PREFIX)
-base64_bot_token = 'TnpJNE1qSTJPVFF3TVRNM01qUXlOamszLlh2NW9Sdy4zaVdzN3FGeFBVMlZOYXNiVXFFcmM4cnpfZ00='
-bot_token = (base64.b64decode(base64_bot_token)).decode()
+try:
+    # Try to get the config key from Heroku server when deploying.
+    bot_token = S3Connection(os.environ['DISCORD_BOT_TOKEN'])
+except boto.exception.NoAuthHandlerFound:
+    # When running locally get the token from the local environment variable.
+    bot_token = os.environ['DISCORD_BOT_TOKEN']
 players = []  # type: List[Player]
 """ A list containing all the Player objects, representing the players in the game. """
 
