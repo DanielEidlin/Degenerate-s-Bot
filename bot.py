@@ -134,7 +134,7 @@ async def reset(ctx):
 
 
 @client.command(pass_context=True)
-async def remove(mention_string):
+async def remove(ctx, mention_string):
     """
     removes a player from game
     :return: None
@@ -145,7 +145,7 @@ async def remove(mention_string):
 
 
 @client.command(pass_context=True)
-async def add(player):
+async def add(ctx, player):
     """
     adds a player to game
     :return: None
@@ -193,7 +193,7 @@ async def vote(ctx, mention_string: str):
     user = ctx.author
     voter = get_player_by_mention_string(user.mention)
     voted_player = get_player_by_mention_string(mention_string)
-    if not voter.has_voted and voted_player:
+    if voter and not voter.has_voted and voted_player:
         voter.has_voted = True  # Update user's vote state to True.
         voted_player.round_score += 1  # Increment score of the chosen user.
 
