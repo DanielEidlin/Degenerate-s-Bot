@@ -18,6 +18,7 @@ class Player(object):
         self.total_score = 0
         self.has_voted = False
         self.has_generated = False
+        self.last_generated_waifu = None
 
 
 def get_player_by_mention_string(mention_string: str) -> Optional[Player]:
@@ -124,6 +125,7 @@ async def generate(ctx):
     if not player.has_generated:
         player.has_generated = True
         response = requests.get("https://mywaifulist.moe/random")
+        player.last_generated_waifu = response.url
         # url = "https://mywaifulist.moe/waifu/jiao-sun"
         await ctx.send("{} has a new waifu!! \n".format(user) + response.url)
     else:
@@ -270,6 +272,28 @@ async def finish(ctx):
         results = f"the winner is {winners[0]}!!!"
     gif = "https://giphy.com/gifs/thebachelor-the-bachelor-thebachelorabc-bachelorabc-EBolRO7z50KTOn85Pi"
     await ctx.send(results + "\n" + gif)
+
+
+@client.command(pass_context=True)
+async def sauce(ctx):
+    """
+    Sends user's last generated waifu to the sauce channel.
+    :param ctx:
+    :return:
+    """
+    user = ctx.author
+    player = get_player_by_mention_string(user.mention)
+    role_names = [role.name for role in user.roles]
+    if "Waifu Protector" in role_names and player.last_generated_waifu:
+        sauce_channel = client.get_channel(724375129152421888)
+        await sauce_channel.send(player.last_generated_waifu)
+    elif "Waifu Protector" not in role_names:
+        meme = "https://media.giphy.com/media/3o6Ztkyci9UZWEJXB6/giphy.gif"
+        await ctx.send(
+            f"403 Permission Denied!\nIt looks like you don't have Waifu Protector permissions :man_shrugging:\n{meme}")
+    else:
+        meme = "https://i.pinimg.com/originals/89/34/0c/89340c603da5464fcb0a3e04c5d5f28c.jpg"
+        await ctx.send(f"404 Waifu not found\n{meme}")
 
 
 client.run(bot_token)
