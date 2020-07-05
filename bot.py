@@ -75,6 +75,7 @@ def end_round():
     for player in players:
         player.round_score = 0
         player.has_voted = False
+        player.has_generated = False
 
 
 def update_players(guild):
