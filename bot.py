@@ -1,12 +1,18 @@
-import base64
+import os
+import boto
 import requests
 from typing import Optional
 from discord.ext import commands
+from boto.s3.connection import S3Connection
 
 PREFIX = '!'
 client = commands.Bot(command_prefix=PREFIX)
-base64_bot_token = 'TnpJNE1qSTJPVFF3TVRNM01qUXlOamszLlh2NW9Sdy4zaVdzN3FGeFBVMlZOYXNiVXFFcmM4cnpfZ00='
-bot_token = (base64.b64decode(base64_bot_token)).decode()
+try:
+    # Try to get the config key from Heroku server when deploying.
+    bot_token = S3Connection(os.environ['DISCORD_BOT_TOKEN'])
+except boto.exception.NoAuthHandlerFound:
+    # When running locally get the token from the local environment variable.
+    bot_token = os.environ['DISCORD_BOT_TOKEN']
 players = []  # type: List[Player]
 """ A list containing all the Player objects, representing the players in the game. """
 
@@ -266,10 +272,10 @@ async def finish(ctx):
     if len(winners) > 1:
         winner_names = ""
         for winner in winners:
-            winner_names += " " + winner.name
+            winner_names += " " + winner.mention_string
         results = f"the winners are {winner_names}!!!"
     else:
-        results = f"the winner is {winners[0]}!!!"
+        results = f"the winner is {winners[0].mention_string}!!!"
     gif = "https://giphy.com/gifs/thebachelor-the-bachelor-thebachelorabc-bachelorabc-EBolRO7z50KTOn85Pi"
     await ctx.send(results + "\n" + gif)
 
