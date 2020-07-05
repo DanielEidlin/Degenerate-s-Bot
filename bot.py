@@ -17,6 +17,7 @@ class Player(object):
         self.round_score = 0
         self.total_score = 0
         self.has_voted = False
+        self.has_generated = False
 
 
 def get_player_by_mention_string(mention_string: str) -> Optional[Player]:
@@ -118,9 +119,15 @@ async def generate(ctx):
     :return: A URL that contains a random waifu
     """
     user = ctx.author
-    response = requests.get("https://mywaifulist.moe/random")
-    # url = "https://mywaifulist.moe/waifu/jiao-sun"
-    await ctx.send("{} has a new waifu!! \n".format(user) + response.url)
+    player = get_player_by_mention_string(user.mention)
+    if not player.has_generated:
+        player.has_generated = True
+        response = requests.get("https://mywaifulist.moe/random")
+        # url = "https://mywaifulist.moe/waifu/jiao-sun"
+        await ctx.send("{} has a new waifu!! \n".format(user) + response.url)
+    else:
+        gif = "https://i.pinimg.com/originals/39/24/4c/39244c83c1d1351b1db447466774e4be.gif"
+        await ctx.send(f"How could you betray your waifu?! :cry:\n{gif}")
 
 
 @client.command(pass_context=True)
