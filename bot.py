@@ -143,6 +143,16 @@ async def remove(ctx, mention_string):
     if player in players:
         players.remove(player)
 
+    # Check if all users have voted.
+    for player in players:
+        if not player.has_voted:
+            return
+
+    end_round()
+    # Send score.
+    prettified_score = prettifie_score()
+    await ctx.send(f"Here is the score:\n{prettified_score}")
+
 
 @client.command(pass_context=True)
 async def add(ctx, player):
