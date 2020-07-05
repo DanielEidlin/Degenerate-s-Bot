@@ -217,6 +217,10 @@ async def vote(ctx, mention_string: str):
         prettified_score = prettifie_score()
         await ctx.send(f"Here is the score:\n{prettified_score}")
 
+    elif voter.has_voted:
+        meme = "https://i.kym-cdn.com/entries/icons/facebook/000/028/207/Screen_Shot_2019-01-17_at_4.22.43_PM.jpg"
+        await ctx.send(f"You have already voted! :rage:\n{meme}")
+
     else:
         await ctx.send("This user is more imaginary then your girlfriend!")
 
