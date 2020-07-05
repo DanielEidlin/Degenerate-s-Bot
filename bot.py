@@ -25,6 +25,7 @@ class Player(object):
         self.total_score = 0
         self.has_voted = False
         self.has_generated = False
+        self.last_generated_waifu = None
 
 
 def get_player_by_mention_string(mention_string: str) -> Optional[Player]:
@@ -131,6 +132,7 @@ async def generate(ctx):
     if not player.has_generated:
         player.has_generated = True
         response = requests.get("https://mywaifulist.moe/random")
+        player.last_generated_waifu = response.url
         # url = "https://mywaifulist.moe/waifu/jiao-sun"
         await ctx.send("{} has a new waifu!! \n".format(user) + response.url)
     else:
@@ -271,12 +273,21 @@ async def finish(ctx):
     if len(winners) > 1:
         winner_names = ""
         for winner in winners:
-            winner_names += " " + winner.name
+            winner_names += " " + winner.mention_string
         results = f"the winners are {winner_names}!!!"
     else:
-        results = f"the winner is {winners[0]}!!!"
+        results = f"the winner is {winners[0].mention_string}!!!"
     gif = "https://giphy.com/gifs/thebachelor-the-bachelor-thebachelorabc-bachelorabc-EBolRO7z50KTOn85Pi"
     await ctx.send(results + "\n" + gif)
+
+
+@client.command(pass_context=True)
+async def sauce(ctx):
+    """
+    sends the user's last generated waifu to the sauce channel.
+    :param ctx:
+    :return:
+    """
 
 
 client.run(bot_token)
