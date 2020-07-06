@@ -3,6 +3,7 @@ import boto
 import discord
 import requests
 from typing import Optional
+from bs4 import BeautifulSoup
 from discord.ext import commands
 from boto.s3.connection import S3Connection
 
@@ -97,6 +98,31 @@ def update_players(guild):
         players.append(Player(mention_string=member.mention))
 
 
+def fetch_waifu_data(user):
+    """
+    Generates a random waifu, extracts useful information about her/him and constructs an embed.
+    :param user: The user who generated the waifu.
+    :return: An embed.
+    """
+    # url = "https://mywaifulist.moe/waifu/jiao-sun"
+    response = requests.get("https://mywaifulist.moe/random")
+    soup = BeautifulSoup(response.text, 'html.parser')
+    name = soup.find("meta", property="og:title")["content"]
+    description = soup.find("meta", attrs={"name": "description"})["content"]
+    image_url = soup.find("meta", property="og:image")["content"]
+
+    embed = discord.Embed(
+        title=name,
+        description=description,
+        color=user.color,
+        url=response.url
+    )
+    embed.set_image(url=image_url)
+    embed.set_author(name=user.display_name, icon_url=user.avatar_url)
+
+    return embed
+
+
 @client.event
 async def on_ready():
     """
@@ -129,12 +155,10 @@ async def generate(ctx):
     """
     user = ctx.author
     player = get_player_by_mention_string(user.mention)
-    if not player.has_generated:
+    if player and not player.has_generated:
         player.has_generated = True
-        response = requests.get("https://mywaifulist.moe/random")
-        player.last_generated_waifu = response.url
-        # url = "https://mywaifulist.moe/waifu/jiao-sun"
-        await ctx.send("{} has a new waifu!! \n".format(user) + response.url)
+        embed = fetch_waifu_data(user)
+        await ctx.send("{} has a new waifu!! \n".format(user.display_name), embed=embed)
     else:
         await ctx.send(f"How could you betray your waifu?! :cry:\n", file=discord.File('assets/02.gif'))
 
