@@ -1,7 +1,9 @@
 import os
 import boto
+import discord
 import requests
 from typing import Optional
+from bs4 import BeautifulSoup
 from discord.ext import commands
 from boto.s3.connection import S3Connection
 
@@ -96,6 +98,31 @@ def update_players(guild):
         players.append(Player(mention_string=member.mention))
 
 
+def fetch_waifu_data(user):
+    """
+    Generates a random waifu, extracts useful information about her/him and constructs an embed.
+    :param user: The user who generated the waifu.
+    :return: An embed.
+    """
+    # url = "https://mywaifulist.moe/waifu/jiao-sun"
+    response = requests.get("https://mywaifulist.moe/random")
+    soup = BeautifulSoup(response.text, 'html.parser')
+    name = soup.find("meta", property="og:title")["content"]
+    description = soup.find("meta", attrs={"name": "description"})["content"]
+    image_url = soup.find("meta", property="og:image")["content"]
+
+    embed = discord.Embed(
+        title=name,
+        description=description,
+        color=user.color,
+        url=response.url
+    )
+    embed.set_image(url=image_url)
+    embed.set_author(name=user.display_name, icon_url=user.avatar_url)
+
+    return embed
+
+
 @client.event
 async def on_ready():
     """
@@ -128,15 +155,12 @@ async def generate(ctx):
     """
     user = ctx.author
     player = get_player_by_mention_string(user.mention)
-    if not player.has_generated:
+    if player and not player.has_generated:
         player.has_generated = True
-        response = requests.get("https://mywaifulist.moe/random")
-        player.last_generated_waifu = response.url
-        # url = "https://mywaifulist.moe/waifu/jiao-sun"
-        await ctx.send("{} has a new waifu!! \n".format(user) + response.url)
+        embed = fetch_waifu_data(user)
+        await ctx.send("{} has a new waifu!! \n".format(user.display_name), embed=embed)
     else:
-        gif = "https://i.pinimg.com/originals/39/24/4c/39244c83c1d1351b1db447466774e4be.gif"
-        await ctx.send(f"How could you betray your waifu?! :cry:\n{gif}")
+        await ctx.send(f"How could you betray your waifu?! :cry:\n", file=discord.File('assets/02.gif'))
 
 
 @client.command(pass_context=True)
@@ -234,8 +258,7 @@ async def vote(ctx, mention_string: str):
         await ctx.send(f"Here is the score:\n{prettified_score}")
 
     elif voter.has_voted:
-        meme = "https://i.kym-cdn.com/entries/icons/facebook/000/028/207/Screen_Shot_2019-01-17_at_4.22.43_PM.jpg"
-        await ctx.send(f"You have already voted! :rage:\n{meme}")
+        await ctx.send(f"You have already voted! :rage:\n", file=discord.File('assets/illegal.jpg'))
 
     else:
         await ctx.send("This user is more imaginary then your girlfriend!")
@@ -276,8 +299,7 @@ async def finish(ctx):
         results = f"the winners are {winner_names}!!!"
     else:
         results = f"the winner is {winners[0].mention_string}!!!"
-    gif = "https://giphy.com/gifs/thebachelor-the-bachelor-thebachelorabc-bachelorabc-EBolRO7z50KTOn85Pi"
-    await ctx.send(results + "\n" + gif)
+    await ctx.send(f"{results}\n", file=discord.File('assets/finish.gif'))
 
 
 @client.command(pass_context=True)
@@ -294,12 +316,11 @@ async def sauce(ctx):
         sauce_channel = client.get_channel(724375129152421888)
         await sauce_channel.send(player.last_generated_waifu)
     elif "Waifu Protector" not in role_names:
-        meme = "https://media.giphy.com/media/3o6Ztkyci9UZWEJXB6/giphy.gif"
         await ctx.send(
-            f"403 Permission Denied!\nIt looks like you don't have Waifu Protector permissions :man_shrugging:\n{meme}")
+            f"403 Forbidden!\nIt looks like you don't have Waifu Protector permissions :man_shrugging:\n",
+            file=discord.File('assets/403.gif'))
     else:
-        meme = "https://i.pinimg.com/originals/89/34/0c/89340c603da5464fcb0a3e04c5d5f28c.jpg"
-        await ctx.send(f"404 Waifu not found\n{meme}")
+        await ctx.send(f"404 Waifu not found\n", file=discord.File('assets/404.jpg'))
 
 
 client.run(bot_token)
