@@ -315,7 +315,7 @@ async def sauce(ctx):
     role_names = [role.name for role in user.roles]
     if "Waifu Protector" in role_names and player.last_generated_waifu:
         sauce_channel = client.get_channel(724375129152421888)
-        await sauce_channel.send(player.last_generated_waifu)
+        await sauce_channel.send(embed=player.last_generated_waifu)
     elif "Waifu Protector" not in role_names:
         await ctx.send(
             f"403 Forbidden!\nIt looks like you don't have Waifu Protector permissions :man_shrugging:\n",
