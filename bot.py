@@ -158,6 +158,7 @@ async def generate(ctx):
     if player and not player.has_generated:
         player.has_generated = True
         embed = fetch_waifu_data(user)
+        player.last_generated_waifu = embed
         await ctx.send("{} has a new waifu!! \n".format(user.display_name), embed=embed)
     else:
         await ctx.send(f"How could you betray your waifu?! :cry:\n", file=discord.File('assets/02.gif'))
