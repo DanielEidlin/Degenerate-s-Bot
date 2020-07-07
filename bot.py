@@ -262,7 +262,7 @@ async def vote(ctx, mention_string: str):
         await ctx.send(f"You have already voted! :rage:\n", file=discord.File('assets/illegal.jpg'))
 
     else:
-        await ctx.send("This user is more imaginary then your girlfriend!")
+        await ctx.send("This user is more imaginary than your girlfriend!")
 
 
 @client.command(pass_context=True)
