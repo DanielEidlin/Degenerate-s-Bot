@@ -9,8 +9,7 @@ from boto.s3.connection import S3Connection
 
 PREFIX = '!'
 client = commands.Bot(command_prefix=PREFIX)
-# Setting `Watching ` status
-await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="Boku no Pico"))
+
 try:
     # Try to get the config key from Heroku server when deploying.
     bot_token = S3Connection(os.environ['DISCORD_BOT_TOKEN'])
@@ -131,6 +130,9 @@ async def on_ready():
     called after the bot has connected online
     :return: None
     """
+    # Setting `Watching ` status
+    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="Boku no Pico"))
+
     for guild in client.guilds:
         await guild.text_channels[0].send("BRACE YOURSELVES DEGENERATES! IT'S SHOW TIME!!!!")
 
